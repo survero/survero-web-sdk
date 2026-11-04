@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Survero · vanilla</title>
+    <style>body{font-family:system-ui,sans-serif}</style>
+    <!--
+      Sin bundler: el build para <script>. Con data-key se inicializa solo:
+      <script src="https://cdn.jsdelivr.net/npm/@survero/web@0/dist/survero.js" data-key="pk_live_…" defer></script>
+      Aquí se inicializa a mano para leer la clave de la URL (las pruebas la pasan como ?key=…&api=…).
+    -->
+    <script src="/survero.js"></script>
+    <script>
+      const params = new URLSearchParams(location.search);
+      Survero.init({
+        apiKey: params.get('key') ?? 'pk_live_REPLACE_ME',
+        ...(params.get('api') ? { baseUrl: params.get('api') } : {}),
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Survero · vanilla</h1>
+    <p>Screen: <code id="path"></code></p>
+    <button id="checkout">Complete checkout</button>
+    <button id="login">Sign in as demo-user</button>
+    <button id="pricing">Go to pricing</button>
+    <script>
+      const path = () => (document.getElementById('path').textContent = location.pathname);
+      path();
+      document.getElementById('checkout').onclick = () => Survero.track('checkout_completed', { total: 42, express: true });
+      document.getElementById('login').onclick = () => {
+        Survero.identify('demo-user');
+        Survero.setTraits({ plan: 'pro' });
+      };
+      document.getElementById('pricing').onclick = () => {
+        history.pushState(null, '', '/pricing/42' + location.search);
+        path();
+      };
+    </script>
+  </body>
+</html>

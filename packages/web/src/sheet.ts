@@ -194,7 +194,7 @@ const X = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><p
 const STAR = `<svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
 
 // Claro: texto #111827 (17:1), secundario #4b5563 (7.6:1), bordes #6b7280 (4.8:1). Oscuro: equivalentes sobre #1f2937.
-const CSS = `:host{all:initial}
+const CSS = `:host{all:initial;font-family:inherit}
 .bd{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:2147483000}
 .sh{--p:#4f46e5;--on:#fff;--bg:#fff;--fg:#111827;--mu:#4b5563;--ln:#6b7280;--font:inherit;position:fixed;z-index:2147483001;box-sizing:border-box;right:24px;bottom:24px;width:380px;max-width:calc(100vw - 32px);max-height:calc(100vh - 48px);overflow:auto;padding:8px 20px 20px;background:var(--bg);color:var(--fg);font:16px/1.4 var(--font);border-radius:var(--r);box-shadow:0 10px 40px rgba(0,0,0,.25);animation:in .2s ease-out}
 @media (prefers-color-scheme:dark){.sh{--bg:#1f2937;--fg:#f9fafb;--mu:#d1d5db;--ln:#9ca3af}}

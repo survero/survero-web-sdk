@@ -1,0 +1,6 @@
+{
+  "name": "example-vanilla",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "vite" }
+}
