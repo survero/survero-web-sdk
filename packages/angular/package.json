@@ -2,7 +2,7 @@
   "name": "@survero/angular",
   "version": "0.1.0",
   "description": "Survero for Angular (standalone, SSR): product events, identity and in-app micro-surveys.",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -15,7 +15,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md"],
+  "files": ["dist", "README.md", "LICENSE"],
   "keywords": ["survero", "angular", "analytics", "surveys", "nps", "feedback"],
   "scripts": { "build": "tsup" },
   "dependencies": { "@survero/web": "0.1.0" },

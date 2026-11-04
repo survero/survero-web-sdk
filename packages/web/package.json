@@ -2,7 +2,7 @@
   "name": "@survero/web",
   "version": "0.1.0",
   "description": "Survero for the web: product events, identity and in-app micro-surveys. Works with any framework.",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -18,7 +18,7 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md"],
+  "files": ["dist", "README.md", "LICENSE"],
   "keywords": ["survero", "analytics", "events", "surveys", "nps", "feedback", "product-analytics"],
   "scripts": {
     "build": "tsup"
