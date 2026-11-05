@@ -12,13 +12,12 @@ npm install @survero/svelte
 ## SvelteKit
 
 ```svelte
-<!-- src/routes/+layout.svelte — PUBLIC_SURVERO_KEY=pk_live_… in .env -->
+<!-- src/routes/+layout.svelte — VITE_SURVERO_KEY=pk_live_… in .env.local -->
 <script lang="ts">
   import { initSurvero } from '@survero/svelte';
-  import { PUBLIC_SURVERO_KEY } from '$env/static/public';
 
   let { children } = $props();
-  initSurvero({ apiKey: PUBLIC_SURVERO_KEY });
+  initSurvero({ apiKey: import.meta.env.VITE_SURVERO_KEY });
 </script>
 
 {@render children()}
@@ -34,7 +33,8 @@ npm install @survero/svelte
 ```
 
 `initSurvero` runs during server rendering too, where it does nothing; it starts in the browser on hydration. Page
-views are tracked automatically on every navigation (`$screen`).
+views are tracked automatically on every navigation (`$screen`). `import.meta.env.VITE_*` works in SvelteKit 2 and 3
+(SvelteKit 3 removed `$env/static/public`).
 
 ## Svelte (Vite)
 
