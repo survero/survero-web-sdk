@@ -58,7 +58,7 @@ describe('eventos', () => {
   });
 
   it('sin red: la cola persiste y se envía después; un 400 se descarta', async () => {
-    const { s, api, storage } = start();
+    const { s, api, storage, time } = start();
     api.setOffline(true);
     s.track('a');
     await s.flush();
@@ -68,7 +68,7 @@ describe('eventos', () => {
     // Otra instancia (recarga de la página) con el mismo almacén envía lo pendiente.
     const s2 = new SurveroInstance();
     const api2 = fakeApi();
-    s2.init({ apiKey: 'pk_live_test', baseUrl: 'https://api.test/api/v1', fetch: api2.fetch, storage, autoScreen: false });
+    s2.init({ apiKey: 'pk_live_test', baseUrl: 'https://api.test/api/v1', fetch: api2.fetch, now: time.now, storage, autoScreen: false });
     await s2.flush();
     expect(api2.names()).toEqual(['$install', '$session_started', 'a']);
 
