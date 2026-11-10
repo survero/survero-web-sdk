@@ -61,6 +61,11 @@ export interface PendingOp {
 export class Tracker {
   readonly sinks = new Set<SurveroSink>();
   private flushing: Promise<void> | null = null;
+  /**
+   * Eventos en un envío en curso. El envío con `keepalive` (pestaña oculta / cierre) no espera al normal: sin esto,
+   * visibilitychange + pagehide + el intervalo mandaban el mismo lote 2–3 veces (lo vieron los agentes de A6).
+   */
+  private readonly inflight = new Set<string>();
 
   constructor(
     private readonly client: Client,
@@ -171,17 +176,26 @@ export class Tracker {
     try {
       await this.flushPendingOps(keepalive);
       for (;;) {
-        let batch = this.queue().slice(0, BATCH);
+        let batch = this.queue()
+          .filter((e) => !this.inflight.has(e.eventId))
+          .slice(0, BATCH);
         if (!batch.length) return;
         let body = batch.map((e) => this.toApi(e));
         if (keepalive) {
           while (body.length > 1 && JSON.stringify(body).length > KEEPALIVE_BYTES) body = body.slice(0, body.length >> 1);
           batch = batch.slice(0, body.length);
         }
-        const outcome: SendOutcome = await this.client.postEvents(body, keepalive);
+        const ids = batch.map((e) => e.eventId);
+        ids.forEach((id) => this.inflight.add(id));
+        let outcome: SendOutcome;
+        try {
+          outcome = await this.client.postEvents(body, keepalive);
+        } finally {
+          ids.forEach((id) => this.inflight.delete(id));
+        }
         if (outcome === 'retry') return;
         if (outcome === 'drop') log(`${batch.length} event(s) rejected by the API`);
-        const sent = new Set(batch.map((e) => e.eventId));
+        const sent = new Set(ids);
         this.saveQueue(this.queue().filter((e) => !sent.has(e.eventId)));
         if (keepalive) return; // la página se va: un lote basta
       }

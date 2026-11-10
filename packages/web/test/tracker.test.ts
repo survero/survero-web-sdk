@@ -62,6 +62,21 @@ describe('eventos', () => {
     expect(messages.some((m) => m.includes('prop "platform" is reserved'))).toBe(true);
   });
 
+  it('ocultar la pestaña durante un envío no repite el lote (visibilitychange + pagehide + intervalo)', async () => {
+    const { s, api } = start();
+    s.track('checkout_completed');
+    const core = (s as any).core.tracker;
+    const normal = s.flush();
+    core.onHidden(); // visibilitychange
+    core.onHidden(); // pagehide
+    await normal;
+    await new Promise((r) => setTimeout(r, 0));
+    await s.flush();
+    const ids = api.events().map((e) => e.event_id);
+    expect(ids.length).toBe(new Set(ids).size);
+    expect(api.names().filter((n) => n === 'checkout_completed')).toHaveLength(1);
+  });
+
   it("baseUrl '' (variable de entorno sin poner) = Survero cloud", async () => {
     const api = fakeApi();
     const urls: string[] = [];
