@@ -15,7 +15,7 @@ export function initSurvero(options: SurveroOptions): SurveroInstance {
   return Survero;
 }
 
-/** La instancia de Survero en cualquier componente. */
+/** The Survero instance, in any component. */
 export function getSurvero(): SurveroInstance {
   return getContext<SurveroInstance | undefined>(KEY) ?? Survero;
 }

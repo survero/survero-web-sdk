@@ -27,7 +27,7 @@ export function SurveroProvider({ children, ...options }: SurveroProviderProps) 
   return createElement(Context.Provider, { value: Survero }, children);
 }
 
-/** La instancia de Survero: `const survero = useSurvero(); survero.track('signup_completed')`. */
+/** The Survero instance: `const survero = useSurvero(); survero.track('signup_completed')`. */
 export function useSurvero(): SurveroInstance {
   return useContext(Context);
 }

@@ -10,7 +10,7 @@ export interface EligibleSurvey {
   options: SurveyOption[];
   followup: SurveyFollowup | null;
   submitLabel: string | null;
-  /** Escala de `star` (1..max) y `nps` (0..10). */
+  /** Scale of `star` (1..max) and `nps` (0..10). */
   scaleMin: number | null;
   scaleMax: number | null;
   style: { primaryColor?: string; fontFamily?: string; borderRadius?: number };

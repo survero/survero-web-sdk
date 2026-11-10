@@ -16,7 +16,7 @@ export interface SurveroOptions {
   baseUrl?: string;
   /** Your app version (the `app_version` column, to cut results by release). */
   appVersion?: string;
-  /** Si la app ya conoce al usuario (equivale a llamar `identify`). */
+  /** If the app already knows the user (same as calling `identify`). */
   userId?: string;
   /** Seconds between sends. Default 15. */
   flushInterval?: number;
@@ -28,11 +28,11 @@ export interface SurveroOptions {
   autoScreen?: boolean | ((url: URL) => string | null);
   /** Events go to the console and the sinks, without being sent (tests, previews). */
   dryRun?: boolean;
-  /** @internal pruebas */
+  /** @internal tests */
   storage?: KeyValueStore;
-  /** @internal pruebas */
+  /** @internal tests */
   fetch?: typeof fetch;
-  /** @internal pruebas */
+  /** @internal tests */
   now?: () => number;
 }
 
@@ -67,7 +67,7 @@ export class SurveroSurveys {
   enabled = true;
   /** Local override of the server style. */
   theme?: SurveroTheme;
-  /** Modo headless: tu propia UI. El SDK sigue contando impresiones, caps y eventos. */
+  /** Headless mode: your own UI. The SDK still counts impressions, caps and events. */
   renderer?: SurveyRenderer;
 
   /** @internal */
