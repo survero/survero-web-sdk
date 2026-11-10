@@ -47,14 +47,29 @@ describe('eventos', () => {
     expect(api.to('/sdk/identify')[0]!.body).toMatchObject({ user_id: 'user-1' });
   });
 
-  it('nombres inválidos y props reservadas', async () => {
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('nombres inválidos y props reservadas (con aviso, una vez por clave)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { s, api } = start();
     s.track('Bad Name');
     s.track('ok_event', { platform: 'ios', user_id: 'x', n: NaN, f: () => 1, nested: { a: true } });
+    s.track('ok_event', { source: 'paywall' });
+    s.track('ok_event', { source: 'menu' });
     await s.flush();
     expect(api.names()).not.toContain('Bad Name');
     expect(api.events().find((e) => e.event_name === 'ok_event').props).toEqual({ nested: { a: 1 } });
+    const messages = warn.mock.calls.map((c) => c.join(' '));
+    expect(messages.filter((m) => m.includes('prop "source" is reserved'))).toHaveLength(1);
+    expect(messages.some((m) => m.includes('prop "platform" is reserved'))).toBe(true);
+  });
+
+  it("baseUrl '' (variable de entorno sin poner) = Survero cloud", async () => {
+    const api = fakeApi();
+    const urls: string[] = [];
+    const fetch = ((input: string, init?: RequestInit) => (urls.push(input), api.fetch(input, init))) as typeof globalThis.fetch;
+    const s = new SurveroInstance();
+    s.init({ apiKey: 'pk_live_test', baseUrl: '', fetch, storage: memoryStore(), autoScreen: false });
+    await s.flush();
+    expect(urls[0]).toMatch(/^https:\/\/api\.survero\.com\/api\/v1\//);
   });
 
   it('sin red: la cola persiste y se envía después; un 400 se descarta', async () => {

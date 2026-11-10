@@ -4,7 +4,7 @@ import { log } from './store';
 export const NAME = /^[a-z][a-z0-9_]{0,39}$/;
 
 /** Claves que son columnas en el servidor: dentro de props el evento se rechazaría. */
-const RESERVED = new Set(
+export const RESERVED_PROPS = new Set(
   'platform app_version sdk_version country country_ip locale user_id device_id session_id source environment event_id event_name client_ts server_ts project_id identity'.split(
     ' ',
   ),
@@ -13,12 +13,25 @@ const RESERVED = new Set(
 export type Props = Record<string, unknown>;
 export type Json = string | number | null | Json[] | { [k: string]: Json };
 
-/** Props listas para JSON: booleanos → 0/1, Date → ISO, recursivo; no finitos y funciones fuera; reservadas fuera. */
+/** Avisadas ya (una vez por clave: no inundar la consola si se trackea en un bucle). */
+const warned = new Set<string>();
+
+/**
+ * Props listas para JSON: booleanos → 0/1, Date → ISO, recursivo; no finitos y funciones fuera. Las reservadas se
+ * quitan (si no, el servidor rechazaría el evento entero) y se avisa: si no, `source` desaparecía sin que nadie lo viera.
+ */
 export function sanitizeProps(props?: Props | null): Record<string, Json> {
   const out: Record<string, Json> = {};
   if (!props) return out;
   for (const [key, value] of Object.entries(props)) {
-    if (RESERVED.has(key) || !key || key.length > 64) continue;
+    if (RESERVED_PROPS.has(key)) {
+      if (!warned.has(key)) {
+        warned.add(key);
+        log(`prop "${key}" is reserved and was dropped (the SDK sets it, or it is a column). Rename it, e.g. "${key}_name" or "entry_${key}". Reserved: ${[...RESERVED_PROPS].join(', ')}`);
+      }
+      continue;
+    }
+    if (!key || key.length > 64) continue;
     const v = clean(value, 0);
     if (v !== undefined) out[key] = v;
   }

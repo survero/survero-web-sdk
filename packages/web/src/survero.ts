@@ -126,7 +126,8 @@ export class SurveroInstance {
         log('init() needs the project public key (pk_…)');
         return;
       }
-      const baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
+      // `''` o sin definir (p. ej. VITE_SURVERO_API_URL no puesta en producción) = Survero cloud.
+      const baseUrl = options.baseUrl || DEFAULT_BASE_URL;
       const key = `${apiKey}|${baseUrl}`;
       if (this.core?.key === key) return; // React StrictMode, HMR: mismo proyecto, nada que hacer
       this.dispose();
