@@ -3,7 +3,7 @@ import { log } from './store';
 /** Names: snake_case ≤ 40. Same as the server. */
 export const NAME = /^[a-z][a-z0-9_]{0,39}$/;
 
-/** Keys that are columns on the server: inside props the event would be rejected. */
+/** Keys the SDK sets itself or that are columns on the server: inside props the server would reject the event. */
 export const RESERVED_PROPS = new Set(
   'platform app_version sdk_version country country_ip locale user_id device_id session_id source environment event_id event_name client_ts server_ts project_id identity'.split(
     ' ',
