@@ -10,8 +10,8 @@ export interface SurveroProviderProps extends SurveroOptions {
 }
 
 /**
- * Inicializa Survero en el navegador (en el servidor no hace nada). Ponlo una vez cerca de la raíz: en Next.js App
- * Router, en `app/layout.tsx`. `userId` sigue a tu sesión: al ponerlo se llama `identify`, al quitarlo `reset`.
+ * Starts Survero in the browser (it does nothing on the server). Put it once near the root: in the Next.js App Router,
+ * in `app/layout.tsx`. `userId` follows your session: setting it calls `identify`, clearing it calls `reset`.
  */
 export function SurveroProvider({ children, ...options }: SurveroProviderProps) {
   const previousUser = useRef<string | undefined>(undefined);

@@ -22,9 +22,8 @@ export interface GateConfig {
 }
 
 /**
- * La puerta. Manual (`show`) y automático (un `track` que coincide con un disparador) pasan por aquí: caps locales →
- * puerta del servidor. Cada evaluación emite `$survey_gate_evaluated {survey, trigger, reason}`, también cuando no se
- * muestra nada.
+ * The gate. Manual (`show`) and automatic (a `track` that matches a trigger) both go through it: local caps → server
+ * gate. Every evaluation emits `$survey_gate_evaluated {survey, trigger, reason}`, also when nothing is shown.
  */
 export class SurveyGate {
   private triggers = new Set<string>();
@@ -38,7 +37,7 @@ export class SurveyGate {
     private readonly sheet: Presenter | null,
   ) {}
 
-  /** Sink del tracker: un evento disparador abre la puerta. */
+  /** Tracker sink: a trigger event opens the gate. */
   readonly sink = (event: SurveroEvent) => {
     if (!event.name.startsWith('$') && this.triggers.has(event.name)) void this.run(null, event.name, event.props);
   };

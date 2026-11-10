@@ -1,9 +1,9 @@
 import { log } from './store';
 
-/** Nombres: snake_case ≤ 40. Igual que el servidor. */
+/** Names: snake_case ≤ 40. Same as the server. */
 export const NAME = /^[a-z][a-z0-9_]{0,39}$/;
 
-/** Claves que son columnas en el servidor: dentro de props el evento se rechazaría. */
+/** Keys that are columns on the server: inside props the event would be rejected. */
 export const RESERVED_PROPS = new Set(
   'platform app_version sdk_version country country_ip locale user_id device_id session_id source environment event_id event_name client_ts server_ts project_id identity'.split(
     ' ',
@@ -13,12 +13,12 @@ export const RESERVED_PROPS = new Set(
 export type Props = Record<string, unknown>;
 export type Json = string | number | null | Json[] | { [k: string]: Json };
 
-/** Avisadas ya (una vez por clave: no inundar la consola si se trackea en un bucle). */
+/** Already warned about (once per key: do not flood the console when tracking in a loop). */
 const warned = new Set<string>();
 
 /**
- * Props listas para JSON: booleanos → 0/1, Date → ISO, recursivo; no finitos y funciones fuera. Las reservadas se
- * quitan (si no, el servidor rechazaría el evento entero) y se avisa: si no, `source` desaparecía sin que nadie lo viera.
+ * Props ready for JSON: booleans → 0/1, Date → ISO, recursive; non-finite numbers and functions dropped. Reserved keys
+ * are removed (otherwise the server would reject the whole event) with a console warning, so they never vanish silently.
  */
 export function sanitizeProps(props?: Props | null): Record<string, Json> {
   const out: Record<string, Json> = {};
@@ -65,7 +65,7 @@ function clean(value: unknown, depth: number): Json | undefined {
   }
 }
 
-/** Traits: null borra la clave; texto ≤ 256; números y booleanos tal cual; el resto como texto. */
+/** Traits: null deletes the key; text ≤ 256; numbers and booleans as they are; anything else as text. */
 export function sanitizeTraits(traits: Props): Record<string, string | number | boolean | null> {
   const out: Record<string, string | number | boolean | null> = {};
   for (const [key, value] of Object.entries(traits)) {
@@ -82,7 +82,7 @@ export function sanitizeTraits(traits: Props): Record<string, string | number | 
   return out;
 }
 
-/** `es-CO` → `CO`. Es la región del idioma, no geo por IP. */
+/** `es-CO` → `CO`. It is the language's region, not IP geolocation. */
 export function countryFromLocale(locale?: string | null): string | null {
   const part = locale?.split(/[-_]/).slice(1).find((p) => /^[A-Za-z]{2}$/.test(p));
   return part ? part.toUpperCase() : null;

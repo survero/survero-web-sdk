@@ -1,4 +1,4 @@
-/** Encuesta que la puerta del servidor decidió mostrar, con el copy ya en un idioma. */
+/** A survey the server gate decided to show, with its copy already in one language. */
 export interface EligibleSurvey {
   id: string;
   slug: string;
@@ -25,11 +25,11 @@ export interface SurveyOption {
 export interface SurveyFollowup {
   prompt: string;
   placeholder?: string;
-  /** Vacío = siempre. */
+  /** Empty = always. */
   forKeys: string[];
 }
 
-/** Respuesta: la clave estable de la opción, el valor de la escala y/o texto libre. */
+/** An answer: the option's stable key, the scale value and/or free text. */
 export interface SurveyAnswer {
   answerKey?: string;
   value?: number;
@@ -39,25 +39,25 @@ export interface SurveyAnswer {
 export type SurveyOutcome = { type: 'answered'; answer: SurveyAnswer } | { type: 'dismissed' };
 
 /**
- * Renderer propio (headless): recibe la encuesta localizada y llama a `complete` una vez. El SDK sigue registrando
- * impresiones, caps y eventos.
+ * Your own renderer (headless): it receives the localized survey and calls `complete` once. The SDK still records
+ * impressions, caps and events.
  */
 export type SurveyRenderer = (survey: EligibleSurvey, complete: (outcome: SurveyOutcome) => void) => void;
 
-/** Override local del estilo del servidor. Colores CSS; radio en px. */
+/** Local override of the server style. CSS colors; radius in px. */
 export interface SurveroTheme {
   primaryColor?: string;
   backgroundColor?: string;
   textColor?: string;
   borderRadius?: number;
-  /** Por defecto, la fuente de la página. La del servidor solo se usa si la página ya la carga y la pones aquí. */
+  /** By default, the page's font. The server's is only used if the page already loads it and you set it here. */
   fontFamily?: string;
 }
 
-/** Tipos que sabe pintar esta versión (se envían al servidor; uno nuevo → `sdk_too_old`). */
+/** Types this version can paint (sent to the server; a newer one → `sdk_too_old`). */
 export const SUPPORTED_TYPES = ['single_choice', 'star', 'nps', 'emoji', 'free_text'];
 
-/** Clave que se emite en `$survey_answered` y se guarda en el servidor. */
+/** Key emitted in `$survey_answered` and stored on the server. */
 export const answerKeyOf = (a: SurveyAnswer) => a.answerKey ?? (a.value != null ? String(a.value) : 'text');
 
 export const followupFor = (s: EligibleSurvey, key: string) =>

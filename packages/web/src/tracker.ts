@@ -2,13 +2,13 @@ import type { Client, SendOutcome } from './client';
 import { NAME, sanitizeProps, sanitizeTraits, type Json, type Props } from './props';
 import { log, readJson, uuid, writeJson, type KeyValueStore } from './store';
 
-/** Un evento tal como lo registra el SDK (y lo reciben los sinks de `Survero.addSink`). */
+/** An event as the SDK records it (and the sinks of `Survero.addSink` receive it). */
 export interface SurveroEvent {
   eventId: string;
   name: string;
   /** Props ya saneadas (booleanos como 0/1). */
   props: Record<string, Json>;
-  /** Momento del evento en el navegador, en ms desde epoch. */
+  /** When the event happened in the browser, in ms since epoch. */
   timestamp: number;
   deviceId: string;
   userId: string | null;
@@ -17,7 +17,7 @@ export interface SurveroEvent {
 
 export type SurveroSink = (event: SurveroEvent) => void;
 
-/** Dimensiones que el SDK estampa en cada evento (columnas en el servidor, nunca props). */
+/** Dimensions the SDK stamps on every event (columns on the server, never props). */
 export interface EventContext {
   platform: string;
   sdkVersion: string;
@@ -39,7 +39,7 @@ const QUEUE_MAX = 100;
 const QUEUE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 const MAX_PENDING_OPS = 50;
 const BATCH = 100;
-/** Límite de `fetch keepalive` (64 kB) con margen. */
+/** `fetch keepalive` limit (64 kB), with margin. */
 const KEEPALIVE_BYTES = 60_000;
 
 interface Session {
@@ -48,22 +48,22 @@ interface Session {
   last: number;
 }
 
-/** Operación que se reintenta si no hay red: identify, traits, exposición o respuesta de encuesta. */
+/** An operation retried when offline: identify, traits, survey exposure or survey answer. */
 export interface PendingOp {
   path: string;
   body: Record<string, unknown>;
 }
 
 /**
- * Núcleo de eventos: identidad, sesiones de 30 min, cola persistente (100 eventos / 7 días), lotes y reintentos.
- * Todo el estado vive en el almacén y se relee en cada operación: varias pestañas comparten cola, sesión e identidad.
+ * Event core: identity, 30-minute sessions, persistent queue (100 events / 7 days), batches and retries. All state
+ * lives in the store and is re-read on every operation: several tabs share queue, session and identity.
  */
 export class Tracker {
   readonly sinks = new Set<SurveroSink>();
   private flushing: Promise<void> | null = null;
   /**
-   * Eventos en un envío en curso. El envío con `keepalive` (pestaña oculta / cierre) no espera al normal: sin esto,
-   * visibilitychange + pagehide + el intervalo mandaban el mismo lote 2–3 veces (lo vieron los agentes de A6).
+   * Events in a send in progress. The `keepalive` send (tab hidden / closing) does not wait for the normal one: without
+   * this, visibilitychange + pagehide + the interval sent the same batch 2–3 times.
    */
   private readonly inflight = new Set<string>();
 
@@ -72,7 +72,7 @@ export class Tracker {
     private readonly store: KeyValueStore,
     readonly context: EventContext,
     private readonly now: () => number,
-    /** false con `dryRun`: los eventos van a consola y sinks, no al API. */
+    /** false with `dryRun`: events go to the console and sinks, not to the API. */
     private readonly send: boolean,
     private readonly flushAt = 20,
   ) {}
@@ -90,7 +90,7 @@ export class Tracker {
     return this.store.get(KEYS.user);
   }
 
-  /** `$install` la primera vez en este navegador; abre o continúa la sesión. */
+  /** `$install` the first time in this browser; opens or continues the session. */
   start() {
     if (!this.store.get(KEYS.device)) {
       void this.deviceId;
@@ -110,13 +110,13 @@ export class Tracker {
     return event;
   }
 
-  /** Eventos del sistema (`$screen`, `$survey_*`). */
+  /** System events (`$screen`, `$survey_*`). */
   trackSystem(name: string, props: Props) {
     this.touch();
     return this.record(name, sanitizeProps(props));
   }
 
-  /** Alias dispositivo → usuario. No reescribe eventos: los siguientes llevan el user_id. */
+  /** Device → user alias. It does not rewrite events: the following ones carry the user_id. */
   identify(userId: string): Promise<void> {
     const id = String(userId ?? '').trim();
     if (!id || id.length > 128 || this.userId === id) return Promise.resolve();
@@ -124,7 +124,7 @@ export class Tracker {
     return this.sendOrKeep({ path: '/sdk/identify', body: { device_id: this.deviceId, user_id: id } });
   }
 
-  /** Cierre de sesión en la app: los eventos siguientes vuelven a ser anónimos (mismo device_id). */
+  /** Logout in the app: the following events are anonymous again (same device_id). */
   reset() {
     this.store.remove(KEYS.user);
   }
@@ -139,25 +139,25 @@ export class Tracker {
     });
   }
 
-  /** Envía lo pendiente: primero las operaciones de identidad, luego eventos en lotes. Llamadas concurrentes comparten envío. */
+  /** Sends what is pending: identity operations first, then events in batches. Concurrent calls share one send. */
   flush(keepalive = false): Promise<void> {
     if (keepalive) return this.doFlush(true);
     return (this.flushing ??= this.doFlush(false).finally(() => (this.flushing = null)));
   }
 
-  /** La pestaña se oculta o se cierra: guarda la última actividad y envía con `keepalive`. */
+  /** The tab is hidden or closing: saves the last activity and sends with `keepalive`. */
   onHidden() {
     const s = this.session();
     if (s) this.saveSession({ ...s, last: this.now() });
     void this.flush(true);
   }
 
-  /** Vuelve a ser visible: si pasaron más de 30 min, se cierra la sesión anterior y se abre otra. */
+  /** Visible again: after more than 30 min, the previous session is closed and a new one opens. */
   onVisible() {
     this.touch();
   }
 
-  /** Envía una operación; sin red queda pendiente y se reintenta en el próximo flush (el servidor es idempotente). */
+  /** Sends an operation; when offline it stays pending and is retried on the next flush (the server is idempotent). */
   async sendOrKeep(op: PendingOp): Promise<void> {
     if (!this.send) {
       log('(dry run, not sent)', op.path, op.body);
@@ -226,7 +226,7 @@ export class Tracker {
     writeJson(this.store, KEYS.session, s);
   }
 
-  /** Actividad ahora. Sin sesión o tras 30 min inactiva: `$session_ended` de la anterior y `$session_started`. */
+  /** Activity now. Without a session or after 30 min idle: `$session_ended` for the previous one and `$session_started`. */
   private touch() {
     const now = this.now();
     const prev = this.session();
@@ -294,7 +294,7 @@ export class Tracker {
   }
 }
 
-/** Quita las claves null (el servidor las trata igual, pero el cuerpo es más corto). */
+/** Removes null keys (the server treats them the same, but the body is shorter). */
 export function strip<T extends Record<string, unknown>>(o: T): T {
   for (const k of Object.keys(o)) if (o[k] == null) delete o[k];
   return o;

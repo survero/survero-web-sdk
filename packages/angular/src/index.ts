@@ -16,14 +16,14 @@ export {
   type SurveyRenderer,
 } from '@survero/web';
 
-/** Token de inyección: `private readonly survero = inject(Survero)`. */
+/** Injection token: `private readonly survero = inject(Survero)`. */
 export abstract class Survero {}
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface Survero extends SurveroInstance {}
 
 /**
- * `bootstrapApplication(App, { providers: [provideSurvero({ apiKey: environment.surveroKey })] })`. Seguro con SSR:
- * en el servidor no hace nada. Los `$screen` salen solos de la navegación del Router (History API).
+ * `bootstrapApplication(App, { providers: [provideSurvero({ apiKey: environment.surveroKey })] })`. SSR-safe: it does
+ * nothing on the server. `$screen` events come from Router navigation on their own (History API).
  */
 export function provideSurvero(options: SurveroOptions): EnvironmentProviders {
   return makeEnvironmentProviders([

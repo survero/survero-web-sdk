@@ -1,9 +1,9 @@
 import { followupFor, isRtl, type EligibleSurvey, type SurveroTheme, type SurveyAnswer, type SurveyOutcome } from './survey';
 
 /**
- * La hoja de encuesta: Shadow DOM (los estilos de la página no la tocan ni ella a la página). Hoja inferior en
- * móvil, tarjeta abajo a la derecha en escritorio. Diálogo modal: foco atrapado, `Esc` cierra, el foco vuelve a
- * donde estaba. Toques ≥ 44 px, contraste AA en claro y oscuro, RTL.
+ * The survey sheet: Shadow DOM (`<survero-survey>`; page styles do not touch it, nor it the page). Bottom sheet on
+ * mobile, card at the bottom right on desktop. Modal dialog (`role="dialog"`): focus trapped, `Esc` closes, focus
+ * returns where it was. Targets ≥ 44 px, AA contrast in light and dark, RTL.
  */
 export function presentSheet(survey: EligibleSurvey, theme?: SurveroTheme): Promise<SurveyOutcome> {
   return new Promise((resolve) => {
@@ -185,7 +185,7 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-/** Etiqueta accesible del botón de cerrar en el idioma de la encuesta. */
+/** Accessible label of the close button, in the survey's language. */
 export function closeLabel(locale: string): string {
   return { es: 'Cerrar', pt: 'Fechar', fr: 'Fermer', de: 'Schließen', it: 'Chiudi' }[locale.split(/[-_]/)[0]!] ?? 'Close';
 }

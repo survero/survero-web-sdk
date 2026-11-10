@@ -11,8 +11,8 @@ interface State {
 }
 
 /**
- * Caps locales: una impresión cada 7 días por navegador, dos descartes de una encuesta = nunca más, respondida =
- * nunca más. Evitan preguntarle al servidor lo que ya se sabe y protegen si no responde.
+ * Local caps: one impression every 7 days per browser, two dismissals of a survey = never again, answered = never
+ * again. They avoid asking the server what is already known, and protect the user if the server does not answer.
  */
 export class LocalCaps {
   constructor(
@@ -29,7 +29,7 @@ export class LocalCaps {
     return s.last_shown_at != null && this.now() - s.last_shown_at < COOLDOWN;
   }
 
-  /** Razón para no preguntar al servidor (solo el cooldown se sabe sin la encuesta). */
+  /** Reason not to ask the server (only the cooldown is known without the survey). */
   blockBeforeServer(): string | null {
     return this.inCooldown(this.read()) ? 'cooldown' : null;
   }

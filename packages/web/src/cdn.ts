@@ -1,8 +1,8 @@
 import { Survero } from './survero';
 
 /**
- * Build para `<script>`: `window.Survero`. Con `data-key` se inicializa solo:
- * `<script src="https://cdn.survero.com/web@0/survero.js" data-key="pk_live_…" defer></script>`
+ * `<script>` build: `window.Survero`. With `data-key` it starts on its own:
+ * `<script src="https://cdn.jsdelivr.net/npm/@survero/web@0/dist/survero.js" data-key="pk_live_…" defer></script>`
  */
 const script = typeof document !== 'undefined' ? (document.currentScript as HTMLScriptElement | null) : null;
 const key = script?.dataset['key'];

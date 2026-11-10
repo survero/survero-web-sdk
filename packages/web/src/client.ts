@@ -1,6 +1,6 @@
 import { readJson, writeJson, type KeyValueStore } from './store';
 
-/** Confirmado, reintentar más tarde (red, 5xx, 408, 429) o descartar (otro 4xx: reintentar no lo arregla). */
+/** Confirmed, retry later (network, 5xx, 408, 429) or drop (any other 4xx: retrying will not fix it). */
 export type SendOutcome = 'sent' | 'retry' | 'drop';
 
 export const outcomeOf = (status: number): SendOutcome =>
@@ -15,7 +15,7 @@ interface TriggersCache {
   fetched_at: number;
 }
 
-/** HTTP contra las rutas SDK del API (`/sdk/...`) con la clave pública. Nunca lanza. */
+/** HTTP against the API's SDK routes (`/sdk/...`) with the public key. Never throws. */
 export class Client {
   private readonly base: string;
 
@@ -34,8 +34,8 @@ export class Client {
   }
 
   /**
-   * `POST /sdk/events`. `keepalive` al cerrar la pestaña: la petición sobrevive a la página (máx. 64 kB). El
-   * servidor deduplica por event_id, así que un lote que se reenvía tras un cierre no cuenta dos veces.
+   * `POST /sdk/events`. `keepalive` when the tab closes: the request outlives the page (max 64 kB). The server
+   * dedupes by event_id, so a batch resent after a close does not count twice.
    */
   postEvents(events: object[], keepalive = false): Promise<SendOutcome> {
     const first = events[0] as { event_id?: string } | undefined;
@@ -57,7 +57,7 @@ export class Client {
     );
   }
 
-  /** Eventos que pueden disparar una encuesta (caché 1 h + ETag). Sin red: la última lista conocida. */
+  /** Events that can trigger a survey (1 h cache + ETag). Offline: the last known list. */
   async getTriggers(): Promise<Set<string>> {
     const cached = readJson<TriggersCache>(this.store, TRIGGERS_KEY);
     const fromCache = () => new Set(cached?.triggers ?? []);
@@ -78,7 +78,7 @@ export class Client {
     }
   }
 
-  /** La puerta del servidor: `{survey, reason, evaluated}` o null sin red / con error. */
+  /** The server gate: `{survey, reason, evaluated}`, or null when offline or on error. */
   async eligible(query: Record<string, string>): Promise<Record<string, unknown> | null> {
     try {
       const res = await this.fetchFn(`${this.base}/sdk/surveys/eligible?${new URLSearchParams(query)}`, {

@@ -6,8 +6,8 @@ export * from '@survero/web';
 const KEY = Symbol('survero');
 
 /**
- * Llamar una vez en el `<script>` del componente raíz (en SvelteKit, `src/routes/+layout.svelte`):
- * `initSurvero({ apiKey: PUBLIC_SURVERO_KEY })`. En el servidor no hace nada; al hidratar, inicializa.
+ * Call once in the root component's `<script>` (in SvelteKit, `src/routes/+layout.svelte`):
+ * `initSurvero({ apiKey: import.meta.env.VITE_SURVERO_KEY })`. It does nothing on the server; it starts on hydration.
  */
 export function initSurvero(options: SurveroOptions): SurveroInstance {
   Survero.init(options);

@@ -11,22 +11,22 @@ export const SDK_VERSION = '0.1.0';
 export const DEFAULT_BASE_URL = 'https://api.survero.com/api/v1';
 
 export interface SurveroOptions {
-  /** Clave PÚBLICA del proyecto (`pk_…`). Una `sk_` se rechaza: en una web la ve cualquiera. */
+  /** The project's PUBLIC key (`pk_…`). An `sk_` is rejected: on a website anyone can see it. */
   apiKey: string;
   baseUrl?: string;
-  /** Versión de tu app (columna `app_version`, para cortar resultados por versión). */
+  /** Your app version (the `app_version` column, to cut results by release). */
   appVersion?: string;
   /** Si la app ya conoce al usuario (equivale a llamar `identify`). */
   userId?: string;
-  /** Segundos entre envíos. Por defecto 15. */
+  /** Seconds between sends. Default 15. */
   flushInterval?: number;
   /**
-   * `$screen` en cada cambio de ruta (History API: Next, Nuxt, SvelteKit, Angular, Vue Router…). `true` por defecto:
-   * el nombre es la ruta con los segmentos variables como `:id` (`/orders/123` → `/orders/:id`). Una función decide
-   * el nombre (o `null` para no registrarla); `false` lo desactiva.
+   * `$screen` on every route change (History API: Next, Nuxt, SvelteKit, Angular, Vue Router…). `true` by default: the
+   * name is the path with variable segments as `:id` (`/orders/123` → `/orders/:id`). A function decides the name (or
+   * `null` to skip it); `false` turns it off.
    */
   autoScreen?: boolean | ((url: URL) => string | null);
-  /** Los eventos van a la consola y a los sinks, sin enviarse (tests, previsualizaciones). */
+  /** Events go to the console and the sinks, without being sent (tests, previews). */
   dryRun?: boolean;
   /** @internal pruebas */
   storage?: KeyValueStore;
@@ -38,7 +38,7 @@ export interface SurveroOptions {
 
 const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined';
 
-/** Segmentos de ruta que son identificadores: números, UUID, hex largo, o tokens largos con dígitos. */
+/** Path segments that are identifiers: numbers, UUIDs, long hex, or long tokens with digits. */
 export function screenName(url: URL): string {
   const path = url.pathname
     .split('/')
@@ -59,13 +59,13 @@ interface Core {
 }
 
 /**
- * `Survero.surveys`. Manual (`show`) y automático (un `track` que coincide con un disparador) pasan por la misma
- * puerta: caps locales y reglas del servidor.
+ * `Survero.surveys`. Manual (`show`) and automatic (a `track` that matches a trigger) go through the same gate: local
+ * caps and server rules.
  */
 export class SurveroSurveys {
   /** Kill switch local. */
   enabled = true;
-  /** Override local del estilo del servidor. */
+  /** Local override of the server style. */
   theme?: SurveroTheme;
   /** Modo headless: tu propia UI. El SDK sigue contando impresiones, caps y eventos. */
   renderer?: SurveyRenderer;
@@ -73,27 +73,27 @@ export class SurveroSurveys {
   /** @internal */
   constructor(private readonly run: (fn: (core: Core) => Promise<SurveyOutcome | null>) => Promise<SurveyOutcome | null>) {}
 
-  /** Muestra una encuesta por slug si la identidad es elegible. No salta caps ni reglas. `null` si no se mostró. */
+  /** Shows a survey by slug if the identity is eligible. It does not skip caps or rules. `null` if it was not shown. */
   show(slug: string, props?: Props): Promise<SurveyOutcome | null> {
     return this.run((c) => c.gate.run(slug, null, sanitizeProps(props)));
   }
 
-  /** Evalúa las encuestas de un evento disparador (el SDK lo hace solo en cada `track`). */
+  /** Evaluates the surveys of a trigger event (the SDK does it on its own on every `track`). */
   onTrigger(event: string, props?: Props): Promise<SurveyOutcome | null> {
     return this.run((c) => c.gate.run(null, event, sanitizeProps(props)));
   }
 
-  /** Recarga la lista de eventos disparadores (caché 1 h con ETag). */
+  /** Reloads the list of trigger events (1 h cache with ETag). */
   refreshTriggers(): Promise<void> {
     return this.run((c) => c.gate.refreshTriggers().then(() => null)).then(() => undefined);
   }
 }
 
 /**
- * Una instancia del SDK. Usa la por defecto: `import { Survero } from '@survero/web'`.
+ * An SDK instance. Use the default one: `import { Survero } from '@survero/web'`.
  *
- * Nada lanza hacia la app. En el servidor (SSR) todo es un no-op. Las llamadas antes de `init` se guardan y se
- * ejecutan al inicializar (en React, los efectos de los hijos corren antes que el del provider).
+ * Nothing throws into the app. On the server (SSR) everything is a no-op. Calls made before `init` are kept and run on
+ * init (in React, children's effects run before the provider's).
  */
 export class SurveroInstance {
   readonly surveys: SurveroSurveys;
@@ -180,27 +180,27 @@ export class SurveroInstance {
     }
   }
 
-  /** Registra un evento. Nombre en snake_case (≤ 40). Booleanos se envían como 0/1. */
+  /** Records an event. Name in snake_case (≤ 40). Booleans are sent as 0/1. Reserved prop keys are dropped with a warning. */
   track(name: string, props?: Props): void {
     this.with((c) => c.tracker.track(name, props));
   }
 
-  /** Pantalla vista (`$screen` con `name`). Con `autoScreen` (por defecto) no hace falta llamarlo. */
+  /** Screen viewed (`$screen` with `name`). With `autoScreen` (the default) you do not need to call it. */
   screen(name: string, props?: Props): void {
     this.with((c) => c.tracker.trackSystem('$screen', { ...sanitizeProps(props), name: String(name) }));
   }
 
-  /** Asocia este navegador a un usuario de tu app (al iniciar sesión). Lo anterior al login queda atribuido. */
+  /** Links this browser to a user of your app (on login), with your internal id, never the email. What happened before login stays attributed. */
   identify(userId: string): void {
     this.with((c) => void c.tracker.identify(userId));
   }
 
-  /** Cierre de sesión: los eventos siguientes vuelven a ser anónimos. */
+  /** Logout: the following events are anonymous again. */
   reset(): void {
     this.with((c) => c.tracker.reset());
   }
 
-  /** Traits del usuario (o del navegador, si aún no hay identify). `null` borra la clave. */
+  /** User traits (or the browser's, if there is no identify yet). `null` deletes the key. */
   setTraits(traits: Props): void {
     this.with((c) => void c.tracker.setTraits(traits));
   }
@@ -209,12 +209,12 @@ export class SurveroInstance {
     this.setTraits({ [key]: value });
   }
 
-  /** Envía ya lo pendiente (también ocurre cada 15 s, al llegar a 20 eventos y al ocultar la pestaña). */
+  /** Sends what is pending now (it also happens every 15 s, at 20 events and when the tab is hidden). */
   flush(): Promise<void> {
     return new Promise((resolve) => this.with((c) => c.tracker.flush().then(resolve, resolve)) || resolve());
   }
 
-  /** Reenvía cada evento a otra herramienta. Devuelve la función para quitarlo. */
+  /** Forwards every event to another tool. Returns the function that removes it. */
   addSink(sink: SurveroSink): () => void {
     this.with((c) => c.tracker.sinks.add(sink));
     return () => this.removeSink(sink);
@@ -224,13 +224,13 @@ export class SurveroInstance {
     this.core?.tracker.sinks.delete(sink);
   }
 
-  /** Libera el SDK (tests, cambio de proyecto). Lo pendiente sigue en el almacén. */
+  /** Releases the SDK (tests, switching project). What is pending stays in the store. */
   dispose(): void {
     this.core?.stop();
     this.core = null;
   }
 
-  /** Ejecuta ya, o al inicializar. false si se descarta (en el servidor, o más de 100 llamadas antes de init). */
+  /** Runs now, or on init. false if dropped (on the server, or more than 100 calls before init). */
   private with(fn: (core: Core) => void): boolean {
     if (this.core) {
       try {
@@ -250,7 +250,7 @@ export class SurveroInstance {
   }
 }
 
-/** Avisa de cada cambio de ruta (pushState, replaceState, popstate), una vez por ruta distinta. */
+/** Reports every route change (pushState, replaceState, popstate), once per distinct route. */
 function watchRoutes(onRoute: (url: URL) => void): () => void {
   let last = '';
   const check = () => {
@@ -280,5 +280,5 @@ function watchRoutes(onRoute: (url: URL) => void): () => void {
   };
 }
 
-/** La instancia por defecto. */
+/** The default instance. */
 export const Survero = new SurveroInstance();

@@ -1,6 +1,6 @@
 /**
- * Almacén clave → JSON. `localStorage` si existe (compartido entre pestañas: se lee en cada operación, nunca se
- * cachea, para que dos pestañas no se pisen la cola o la sesión); si no (SSR, modo privado estricto), memoria.
+ * Key → JSON store. `localStorage` when available (shared between tabs: read on every operation, never cached, so two
+ * tabs do not overwrite each other's queue or session); otherwise (SSR, strict private mode), memory.
  */
 export interface KeyValueStore {
   get(key: string): string | null;
