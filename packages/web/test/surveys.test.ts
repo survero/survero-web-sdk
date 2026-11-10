@@ -170,7 +170,7 @@ describe('encuestas', () => {
     s.surveys.renderer = undefined;
     for (type of ['emoji', 'star', 'free_text']) {
       // Sin cooldown entre pruebas.
-      localStorage.clear();
+      globalThis.localStorage?.clear(); // Node 25+ trae un localStorage propio (undefined sin --localstorage-file) que tapa el de jsdom
       (s as any).core.gate.caps.recordShown = () => {};
       const result = s.surveys.show(type);
       const root = await shown();
