@@ -6,7 +6,7 @@ import { log, readJson, uuid, writeJson, type KeyValueStore } from './store';
 export interface SurveroEvent {
   eventId: string;
   name: string;
-  /** Props ya saneadas (booleanos como 0/1). */
+  /** Props already sanitized (booleans as 0/1). */
   props: Record<string, Json>;
   /** When the event happened in the browser, in ms since epoch. */
   timestamp: number;
